@@ -2,7 +2,7 @@ import { ObjectId } from "mongodb";
 
 import { Router, getExpressRouter } from "./framework/router";
 
-import { Authing, Friending, Posting, Sessioning } from "./app";
+import { Authing, Chat, Friending, Posting, Sessioning } from "./app";
 import { PostOptions } from "./concepts/posting";
 import { SessionDoc } from "./concepts/sessioning";
 import Responses from "./responses";
@@ -119,16 +119,17 @@ class Routes {
     return await Friending.removeFriend(user, friendOid);
   }
 
-  @Router.get("/friend/requests")
-  async getRequests(session: SessionDoc) {
+  @Router.get("/friend/requests/?:filter")
+  async getRequests(session: SessionDoc, filter?: "from" | "to") {
     const user = Sessioning.getUser(session);
-    return await Responses.friendRequests(await Friending.getRequests(user));
+    return await Friending.getRequests(user, filter || "all");
   }
 
   @Router.post("/friend/requests/:to")
   async sendFriendRequest(session: SessionDoc, to: string) {
     const user = Sessioning.getUser(session);
     const toOid = (await Authing.getUserByUsername(to))._id;
+    await Chat.createChat(user, toOid);
     return await Friending.sendRequest(user, toOid);
   }
 
@@ -151,6 +152,22 @@ class Routes {
     const user = Sessioning.getUser(session);
     const fromOid = (await Authing.getUserByUsername(from))._id;
     return await Friending.rejectRequest(fromOid, user);
+  }
+
+  // get the available chats, NOT getting the message
+  @Router.get("/chats")
+  async getAllChats(session: SessionDoc) {
+    const user = Sessioning.getUser(session);
+    return await Chat.getAllChats(user);
+  }
+
+  @Router.post("/chats/chat/:to")
+  async sendChatMessage(session: SessionDoc, to: string, message: string, messageType: "Audio" | "Video") {
+    const user = Sessioning.getUser(session);
+    const toId = (await Authing.getUserByUsername(to))._id;
+
+    const sentMessage = await Chat.sendMessage(user, toId, message, messageType);
+    return sentMessage.msg;
   }
 }
 

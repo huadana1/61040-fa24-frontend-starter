@@ -2,6 +2,7 @@
 import PostListComponent from "@/components/Post/PostListComponent.vue";
 import AddFriend from "@/components/Friend/AddFriend.vue";
 import SeeFriendsList from "@/components/Friend/SeeFriendsList.vue";
+import Inbox from "@/components/Chat/Inbox.vue";
 import { useUserStore } from "@/stores/user";
 import { storeToRefs } from "pinia";
 
@@ -18,6 +19,7 @@ const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
     <PostListComponent />
     <AddFriend />
     <SeeFriendsList />
+    <Inbox />
   </main>
 </template>
 

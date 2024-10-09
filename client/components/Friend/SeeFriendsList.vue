@@ -24,7 +24,7 @@ async function closeModal() {
 
 async function getFriends() {
   try {
-    friends.value = await fetchy(`/api/friend/requests`, "GET");
+    friends.value = await fetchy(`/api/friends`, "GET");
     loaded.value = true;
   } catch (_) {
     return;
